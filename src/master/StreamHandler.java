@@ -10,5 +10,7 @@ package master;
  * @author Ihab BERRO
  */
 public class StreamHandler {
-    
+
+    public StreamHandler() {
+    }
 }
