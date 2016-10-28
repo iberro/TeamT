@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,14 +22,16 @@ import java.util.logging.Logger;
  */
 public class Master extends Thread {
 
-    ServerSocket servSocket;
-    int PORT = 1234;
-    Socket clientSocket;
+    private ServerSocket servSocket;
+    private int PORT = 1234;
+    private Socket clientSocket;
 
-    //ConcurrentHashMap<LoginHandler, > l;
-    
+    private ConcurrentHashMap<String, LoginHandler> loginHandlerList;
+    private ConcurrentHashMap<String, StreamHandler> streamHandlerList;
+
     public Master() {
-
+        loginHandlerList = new ConcurrentHashMap<String, LoginHandler>();
+        streamHandlerList = new ConcurrentHashMap<String, StreamHandler>();
     }
 
     @Override
@@ -38,12 +41,11 @@ public class Master extends Thread {
             while (true) {
                 clientSocket = servSocket.accept();
                 handleConnection(clientSocket);
-
             }
 
         } catch (IOException ex) {
             //Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println(ex.toString());
+            ex.printStackTrace();
         }
     }
 
@@ -52,31 +54,34 @@ public class Master extends Thread {
         Thread thread = new Thread(new Runnable() {
             public void run() {
                 try {
-                    PrintWriter output = new PrintWriter(clientSocket.getOutputStream(),true);                
+                    PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
                     Scanner input = new Scanner(clientSocket.getInputStream());
-                    output.println("ssss");
-                    String d = input.nextLine();
-                    String msgRecv[] = d.split(" ");
-                    
-                    if ( (msgRecv.length != 2) || (!msgRecv[0].toLowerCase().equals("ConnectAs".toLowerCase())) ){
-                        System.out.println("Fail.");
+                    output.println("Connected to Master.");
+                    String msgRecv[] = input.nextLine().split(" ");
+
+                    if ((msgRecv.length != 2) || (!msgRecv[0].toLowerCase().equals("connectas"))) {
+                        output.println("Fail.");
                         clientSocket.close();
                         return;
                     }
                     switch (msgRecv[1].toLowerCase()) {
-                        case "login" :
-                            System.out.println("Login");
+                        case "login":
+                            System.out.println("1111");
+                            LoginHandler newLogin = new LoginHandler(loginHandlerList, clientSocket);
+                            newLogin.start();
                             break;
-                        case "stream" :
-                            System.out.println("Stream");
-                            break;    
-                        default :
+                        case "stream":
+                            System.out.println("streammmm");
+                            StreamHandler newStream = new StreamHandler(streamHandlerList, clientSocket);
+                            newStream.start();
+                            break;
+                        default:
                             clientSocket.close();
                             return;
                     }
                     clientSocket.close();
                 } catch (Exception ex) {
-                    System.out.println(ex.toString());
+                    ex.printStackTrace();
                 }
             }
         });

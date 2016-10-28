@@ -5,12 +5,24 @@
  */
 package master;
 
+import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  *
  * @author Ihab BERRO
  */
-public class StreamHandler {
+public class StreamHandler extends Thread{
 
-    public StreamHandler() {
+    private ConcurrentHashMap<String, StreamHandler> streamHandlerList;
+    private Socket socket;
+    
+    public StreamHandler(ConcurrentHashMap<String, StreamHandler> streamHandlerList, Socket socket) {
+        this.streamHandlerList = streamHandlerList;
+        this.socket = socket;
+    }
+    
+    public void run(){
+    
     }
 }
