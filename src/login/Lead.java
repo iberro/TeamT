@@ -15,7 +15,8 @@ public class Lead {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        LoginServer loginServer = new LoginServer();
+        loginServer.start();
     }
 
 }

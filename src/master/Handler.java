@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package login;
+package master;
 
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -15,18 +15,20 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Ihab BERRO
  */
-public class ClientHandler extends Thread {
+public class Handler extends Thread{
 
-    private ConcurrentHashMap<String, ClientHandler> clientHandlerList;
+    protected ConcurrentHashMap<String, Handler> handlerList;
 
-    private Socket socket;
-    private PrintWriter output;
-    private Scanner input;
+    protected Socket socket;
+    protected PrintWriter output;
+    protected Scanner input;
 
-    private long id;
-
-    public ClientHandler(Socket socket, ConcurrentHashMap<String, ClientHandler> clientHandlerList) throws Exception {
-        this.clientHandlerList = clientHandlerList;
+    protected long id;
+    protected enum HandleType {Login, Stream};
+    protected HandleType handleType;
+    
+    public Handler(ConcurrentHashMap<String, Handler> loginHandlerList, Socket socket) throws Exception {
+        this.handlerList = loginHandlerList;
         this.socket = socket;
 
         output = new PrintWriter(socket.getOutputStream(), true);
@@ -35,10 +37,9 @@ public class ClientHandler extends Thread {
         id = Thread.currentThread().getId();
     }
 
-    @Override
     public void run() {
         try {
-            sendMessage("Connected.");
+            sendMessage("+OK");
             if (input.hasNextLine() && !authentication(input.nextLine())) {
                 endConnection();
                 return;
@@ -48,7 +49,9 @@ public class ClientHandler extends Thread {
                     return;
                 };
             }
-        } catch (Exception ex) {
+        }catch (SocketException ex){
+            removeHandler();
+        }catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -56,34 +59,24 @@ public class ClientHandler extends Thread {
     private boolean authentication(String msg) {
         String cmd[] = msg.split(" ");
 
-        if (cmd.length != 4 || !cmd[0].toLowerCase().equals("signin")) {
+        if (cmd.length != 2 || !cmd[0].equals("key")) {
             return false;
         }
-        if (!cmd[1].equals("client")) {
+        if (!cmd[1].equals("passwordkey")) {
             return false;
         }
-        if (!cmd[2].equals("key")) {
-            return false;
-        }
-        //
-        //
-        //
-        //
-        //
         addHandler();
-        //send address
-        //
         sendMessage("+OK");
         return true;
     }
 
     private void disconnect() throws Exception {
-        clientHandlerList.remove(Long.toString(id));
+        handlerList.remove(Long.toString(id));
         endConnection("+Bye");
     }
 
     private boolean handleCommand(String msg) throws Exception {
-       /* String cmd[] = msg.split(" ");
+        String cmd[] = msg.split(" ");
         if (cmd.length == 0) {
             endConnection();
             return false;
@@ -93,16 +86,13 @@ public class ClientHandler extends Thread {
                 disconnect();
                 return false;
             case "setstatus":
-                if (setStatus()) {
-                    sendMessage("+OK");
-                } else {
-                    sendMessage("-NOK");
-                }
+                if (setStatus()) sendMessage("+OK");
+                else sendMessage("-NOK");
                 break;
             default:
                 endConnection();
                 return false;
-        }*/
+        }
         return true;
     }
 
@@ -121,10 +111,14 @@ public class ClientHandler extends Thread {
     }
 
     private void addHandler() {
-        clientHandlerList.put(Long.toString(id), this);
+        handlerList.put(Long.toString(id), this);
     }
-
-    private void removeHandler() {
-        clientHandlerList.remove(Long.toString(id));
+    private void removeHandler(){
+        handlerList.remove(Long.toString(id));
+    }
+    
+    private boolean setStatus(){
+        System.out.println("Parent");
+        return true;
     }
 }

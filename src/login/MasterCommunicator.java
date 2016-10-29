@@ -5,10 +5,27 @@
  */
 package login;
 
+import java.net.Socket;
+
 /**
  *
  * @author Ihab BERRO
  */
-public class MasterCommunicator {
-    
+public class MasterCommunicator extends Thread {
+
+    Socket clientSoccket;
+    int serverPort;
+
+    public MasterCommunicator() {
+
+    }
+
+    @Override
+    public void run() {
+        try {
+            clientSoccket = new Socket("127.0.0.1", 1234);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 }

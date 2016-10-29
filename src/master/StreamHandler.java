@@ -12,17 +12,14 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Ihab BERRO
  */
-public class StreamHandler extends Thread{
+public class StreamHandler extends Handler{
 
-    private ConcurrentHashMap<String, StreamHandler> streamHandlerList;
-    private Socket socket;
-    
-    public StreamHandler(ConcurrentHashMap<String, StreamHandler> streamHandlerList, Socket socket) {
-        this.streamHandlerList = streamHandlerList;
-        this.socket = socket;
+    public StreamHandler(ConcurrentHashMap<String, Handler> handlerList, Socket socket) throws Exception{
+        super(handlerList, socket);
+        handleType = HandleType.Stream;
     }
-    
-    public void run(){
-    
+    private boolean setStatus(){
+        System.out.println("Child 1");
+        return true;
     }
 }
