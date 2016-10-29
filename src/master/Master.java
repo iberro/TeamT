@@ -30,6 +30,7 @@ public class Master extends Thread {
     private ConcurrentHashMap<String, Handler> streamHandlerList;
 
     public Master() {
+        System.out.println("Master: Construct");
         loginHandlerList = new ConcurrentHashMap<String, Handler>();
         streamHandlerList = new ConcurrentHashMap<String, Handler>();
     }
@@ -37,9 +38,11 @@ public class Master extends Thread {
     @Override
     public void run() {
         try {
+            System.out.println("Master: run");
             servSocket = new ServerSocket(PORT);
             while (true) {
                 clientSocket = servSocket.accept();
+                System.out.println("Master: new con");
                 handleConnection(clientSocket);
             }
 
@@ -56,11 +59,12 @@ public class Master extends Thread {
                 try {
                     PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
                     Scanner input = new Scanner(clientSocket.getInputStream());
-                    output.println("Connected to Master.");
-                    String msgRecv[] = input.nextLine().split(" ");
-
+                    output.println("+OK");
+                    String inStr = input.nextLine();
+                    System.out.println("Master: " + inStr);
+                    String msgRecv[] = inStr.split(" ");
                     if ((msgRecv.length != 2) || (!msgRecv[0].toLowerCase().equals("connectas"))) {
-                        output.println("Fail.");
+                        output.println("-NOK");
                         clientSocket.close();
                         return;
                     }

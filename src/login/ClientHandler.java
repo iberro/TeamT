@@ -38,16 +38,13 @@ public class ClientHandler extends Thread {
     @Override
     public void run() {
         try {
-            sendMessage("Connected.");
+            addHandler();
+            sendMessage("+OK");
             if (input.hasNextLine() && !authentication(input.nextLine())) {
                 endConnection();
                 return;
             };
-            while (input.hasNextLine()) {
-                if (!handleCommand(input.nextLine())) {
-                    return;
-                };
-            }
+            disconnect();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -70,7 +67,6 @@ public class ClientHandler extends Thread {
         //
         //
         //
-        addHandler();
         //send address
         //
         sendMessage("+OK");
@@ -78,36 +74,12 @@ public class ClientHandler extends Thread {
     }
 
     private void disconnect() throws Exception {
-        clientHandlerList.remove(Long.toString(id));
-        endConnection("+Bye");
-    }
-
-    private boolean handleCommand(String msg) throws Exception {
-       /* String cmd[] = msg.split(" ");
-        if (cmd.length == 0) {
-            endConnection();
-            return false;
-        }
-        switch (cmd[0].toLowerCase()) {
-            case "disconnect":
-                disconnect();
-                return false;
-            case "setstatus":
-                if (setStatus()) {
-                    sendMessage("+OK");
-                } else {
-                    sendMessage("-NOK");
-                }
-                break;
-            default:
-                endConnection();
-                return false;
-        }*/
-        return true;
+        removeHandler();
+        endConnection("+OK");
     }
 
     private void endConnection() throws Exception {
-        sendMessage("Fail.");
+        sendMessage("-NOK");
         socket.close();
     }
 

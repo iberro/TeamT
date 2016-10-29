@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Ihab BERRO
  */
-public class Handler extends Thread{
+public class Handler extends Thread {
 
     protected ConcurrentHashMap<String, Handler> handlerList;
 
@@ -24,10 +24,14 @@ public class Handler extends Thread{
     protected Scanner input;
 
     protected long id;
-    protected enum HandleType {Login, Stream};
+
+    protected enum HandleType {
+        Login, Stream
+    };
     protected HandleType handleType;
-    
+
     public Handler(ConcurrentHashMap<String, Handler> loginHandlerList, Socket socket) throws Exception {
+        System.out.println("Handler: const");
         this.handlerList = loginHandlerList;
         this.socket = socket;
 
@@ -49,17 +53,17 @@ public class Handler extends Thread{
                     return;
                 };
             }
-        }catch (SocketException ex){
+        } catch (SocketException ex) {
             removeHandler();
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
     private boolean authentication(String msg) {
+        System.out.println("Handler: " + msg.toString());
         String cmd[] = msg.split(" ");
-
-        if (cmd.length != 2 || !cmd[0].equals("key")) {
+        if (cmd.length != 2 || !cmd[0].toLowerCase().equals("key")) {
             return false;
         }
         if (!cmd[1].equals("passwordkey")) {
@@ -72,10 +76,11 @@ public class Handler extends Thread{
 
     private void disconnect() throws Exception {
         handlerList.remove(Long.toString(id));
-        endConnection("+Bye");
+        endConnection("+OK");
     }
 
     private boolean handleCommand(String msg) throws Exception {
+        System.out.println("Handler: " + msg.toString());
         String cmd[] = msg.split(" ");
         if (cmd.length == 0) {
             endConnection();
@@ -86,8 +91,11 @@ public class Handler extends Thread{
                 disconnect();
                 return false;
             case "setstatus":
-                if (setStatus()) sendMessage("+OK");
-                else sendMessage("-NOK");
+                if (setStatus()) {
+                    sendMessage("+OK");
+                } else {
+                    sendMessage("-NOK");
+                }
                 break;
             default:
                 endConnection();
@@ -97,7 +105,7 @@ public class Handler extends Thread{
     }
 
     private void endConnection() throws Exception {
-        sendMessage("Fail.");
+        sendMessage("-NOK");
         socket.close();
     }
 
@@ -113,11 +121,12 @@ public class Handler extends Thread{
     private void addHandler() {
         handlerList.put(Long.toString(id), this);
     }
-    private void removeHandler(){
+
+    private void removeHandler() {
         handlerList.remove(Long.toString(id));
     }
-    
-    private boolean setStatus(){
+
+    private boolean setStatus() {
         System.out.println("Parent");
         return true;
     }

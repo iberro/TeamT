@@ -23,25 +23,30 @@ import master.StreamHandler;
 public class LoginServer extends Thread {
 
     private ServerSocket servSocket;
-    private int PORT = 1234;
+    private int PORT = 1235;
     private Socket clientSocket;
 
     private MasterCommunicator masterCommunicator;
     private ConcurrentHashMap<String, ClientHandler> clientHandlerList;
 
-    public LoginServer() {
+    public LoginServer() throws Exception {
         masterCommunicator = new MasterCommunicator();
         clientHandlerList = new ConcurrentHashMap<String, ClientHandler>();
     }
 
     @Override
     public void run() {
-        masterCommunicator.start();
-
         try {
+            if (!masterCommunicator.connect("passwordkey")) {
+                        System.out.println("Login: not conn");
+                return;
+            }
+            masterCommunicator.start();
+
             servSocket = new ServerSocket(PORT);
             while (true) {
                 clientSocket = servSocket.accept();
+                System.out.println("Login: new client");
                 ClientHandler clientHandler = new ClientHandler(clientSocket, clientHandlerList);
                 clientHandler.start();
             }

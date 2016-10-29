@@ -15,8 +15,12 @@ public class Lead {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        LoginServer loginServer = new LoginServer();
-        loginServer.start();
+        try {
+            LoginServer loginServer = new LoginServer();
+            loginServer.start();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 }
