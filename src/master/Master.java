@@ -78,6 +78,7 @@ public class Master extends Thread {
                             newStream.start();
                             break;
                         default:
+                            output.println("-NOK");
                             clientSocket.close();
                             return;
                     }
@@ -88,5 +89,4 @@ public class Master extends Thread {
         });
         thread.start();
     }
-
 }

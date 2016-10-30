@@ -24,6 +24,8 @@ public class Handler extends Thread {
     protected Scanner input;
 
     protected long id;
+    protected String ip;
+    protected int port;
 
     protected enum HandleType {
         Login, Stream

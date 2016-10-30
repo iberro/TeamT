@@ -14,6 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StreamHandler extends Handler{
 
+    private Long min;
+    private Long max;
+    
     public StreamHandler(ConcurrentHashMap<String, Handler> handlerList, Socket socket) throws Exception{
         super(handlerList, socket);
         handleType = HandleType.Stream;

@@ -9,6 +9,6 @@ package stream;
  *
  * @author Ihab BERRO
  */
-public class ClientHandler {
+public class ClientHandler extends Thread{
     
 }
