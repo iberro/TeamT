@@ -5,58 +5,19 @@
  */
 package login;
 
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.util.Scanner;
+import common.Server;
+import common.MasterCommunicator;
 
 /**
  *
  * @author Ihab BERRO
  */
-public class MasterCommunicator extends Thread {
+public class LoginMasterCommunicator extends MasterCommunicator {
 
-    Socket clientSoccket;
-    int serverPort;
-    private PrintWriter output;
-    private Scanner input;
-
-    private LoginServer loginServer;
-
-    public MasterCommunicator(LoginServer loginServer) throws Exception {
-        clientSoccket = new Socket("127.0.0.1", 1234);
-        output = new PrintWriter(clientSoccket.getOutputStream(), true);
-        input = new Scanner(clientSoccket.getInputStream());
-
-        this.loginServer = loginServer;
-    }
-
-    @Override
-    public void run() {
-        try {
-            while (input.hasNextLine()) {
-                if (!handleCommand(input.nextLine())) {
-                    return;
-                };
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public boolean connect(String key) throws Exception {
-
-        if (input.hasNextLine() && !isOK(input.nextLine())) {
-            return false;
-        }
-        output.println("ConnectAs Login");
-        if (input.hasNextLine() && !isOK(input.nextLine())) {
-            return false;
-        }
-        output.println("Key " + key);
-        if (input.hasNextLine() && !isOK(input.nextLine())) {
-            return false;
-        }
-        return true;
+    public LoginMasterCommunicator(LoginServer loginServer) throws Exception {
+        super(loginServer);
+        
+        serverType = ServerType.Login;
     }
 
     private boolean handleCommand(String msg) throws Exception {
@@ -80,7 +41,7 @@ public class MasterCommunicator extends Thread {
                         if (cmd.length != 5) {
                             return true;
                         }
-                        loginServer.addStream(
+                        mainServer.addStream(
                                 cmd[2].split(":")[0],
                                 Integer.parseInt(cmd[2].split(":")[1]),
                                 Long.parseLong(cmd[3]),
@@ -90,7 +51,7 @@ public class MasterCommunicator extends Thread {
                         if (cmd.length != 3) {
                             return true;
                         }
-                        loginServer.removeStream(
+                        mainServer.removeStream(
                                 cmd[2].split(":")[0],
                                 Integer.parseInt(cmd[2].split(":")[1]));
                         break;
@@ -98,7 +59,7 @@ public class MasterCommunicator extends Thread {
                         if (cmd.length != 4) {
                             return true;
                         }
-                        loginServer.updateStreamMin(
+                        mainServer.updateStreamMin(
                                 cmd[2].split(":")[0],
                                 Integer.parseInt(cmd[2].split(":")[1]),
                                 Long.parseLong(cmd[3]));
@@ -107,7 +68,7 @@ public class MasterCommunicator extends Thread {
                         if (cmd.length != 4) {
                             return true;
                         }
-                        loginServer.updateStreamMax(
+                        mainServer.updateStreamMax(
                                 cmd[2].split(":")[0],
                                 Integer.parseInt(cmd[2].split(":")[1]),
                                 Long.parseLong(cmd[3]));
@@ -118,23 +79,6 @@ public class MasterCommunicator extends Thread {
                 break;
             default:
                 break;
-        }
-        return true;
-    }
-
-    public boolean setStatus(String status, int priority) throws Exception {
-        output.println("SetStatus " + status + " " + Integer.toString(priority));
-        System.out.println("Login SetStatus " + status + " " + Integer.toString(priority));
-        if (input.hasNextLine() && !isOK(input.nextLine())) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isOK(String msg) {
-        System.out.println("Master comm:" + msg);
-        if (!msg.toLowerCase().equals("+ok")) {
-            return false;
         }
         return true;
     }

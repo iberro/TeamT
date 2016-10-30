@@ -5,11 +5,13 @@
  */
 package stream;
 
+import common.Server;
+
 /**
  *
  * @author Ihab BERRO
  */
-public class StreamServer extends Thread {
+public class StreamServer extends Server {
 
     private long min;
     private long max;
@@ -60,5 +62,10 @@ public class StreamServer extends Thread {
 
     @Override
     public void run(){
+    }
+    
+    public void updateStreamMin(Long Min){
+    }
+        public void updateStreamMax(Long Max){
     }
 }

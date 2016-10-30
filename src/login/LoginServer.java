@@ -5,6 +5,7 @@
  */
 package login;
 
+import common.Server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -22,19 +23,19 @@ import master.StreamHandler;
  *
  * @author Ihab BERRO
  */
-public class LoginServer extends Thread {
+public class LoginServer extends Server {
 
     private ServerSocket servSocket;
     private int PORT = 1235;
     private Socket clientSocket;
 
-    private MasterCommunicator masterCommunicator;
+    private LoginMasterCommunicator masterCommunicator;
     private ArrayList<StreamAddr> streamArray;
     private ConcurrentHashMap<String, ClientHandler> clientHandlerList;
     private Lock lockArray;
 
     public LoginServer() throws Exception {
-        masterCommunicator = new MasterCommunicator(this);
+        masterCommunicator = new LoginMasterCommunicator(this);
         clientHandlerList = new ConcurrentHashMap<String, ClientHandler>();
 
         streamArray = new ArrayList<StreamAddr>();
@@ -62,6 +63,7 @@ public class LoginServer extends Thread {
         }
     }
 
+    @Override
     public void addStream(String ip, int port, long min, long max) {
         lockArray.lock();
         System.out.println("Login add stream: " + ip + Integer.toString(port) + Long.toString(min) + Long.toString(max));
@@ -81,6 +83,7 @@ public class LoginServer extends Thread {
         lockArray.unlock();
     }
 
+    @Override
     public void removeStream(String ip, int port) {
         lockArray.lock();
         System.out.println("Login remove stream: " + ip + Integer.toString(port));
@@ -94,6 +97,7 @@ public class LoginServer extends Thread {
         lockArray.unlock();
     }
 
+    @Override
     public void updateStreamMin(String ip, int port, long newMin) {
         lockArray.lock();
         System.out.println("Login update min stream: " + ip + Integer.toString(port) + Long.toString(newMin));
@@ -107,6 +111,7 @@ public class LoginServer extends Thread {
         lockArray.unlock();
     }
 
+    @Override
     public void updateStreamMax(String ip, int port, long newMax) {
         lockArray.lock();
         try {
