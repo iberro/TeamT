@@ -22,12 +22,14 @@ public class ClientHandler extends Thread {
     private Socket socket;
     private PrintWriter output;
     private Scanner input;
+    private LoginServer loginServer;
 
     private long id;
 
-    public ClientHandler(Socket socket, ConcurrentHashMap<String, ClientHandler> clientHandlerList) throws Exception {
+    public ClientHandler(Socket socket, ConcurrentHashMap<String, ClientHandler> clientHandlerList, LoginServer loginServer) throws Exception {
         this.clientHandlerList = clientHandlerList;
         this.socket = socket;
+        this.loginServer = loginServer;
 
         output = new PrintWriter(socket.getOutputStream(), true);
         input = new Scanner(socket.getInputStream());
@@ -62,14 +64,8 @@ public class ClientHandler extends Thread {
         if (!cmd[2].equals("key")) {
             return false;
         }
-        //
-        //
-        //
-        //
-        //
-        //send address
-        //
-        sendMessage("+OK");
+        StreamAddr stream = loginServer.getStream(Long.parseLong(cmd[3]));
+        sendMessage(stream.getIp() + ":" + Integer.toString(stream.getPort()));
         return true;
     }
 
