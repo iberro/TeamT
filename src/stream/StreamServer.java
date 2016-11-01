@@ -6,6 +6,9 @@
 package stream;
 
 import common.Server;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -13,10 +16,16 @@ import common.Server;
  */
 public class StreamServer extends Server {
 
+    private ServerSocket servSocket;
+    private int port = 1235;
+    private Socket clientSocket;
+
+    private StreamMasterCommunicator masterCommunicator;
+    private ConcurrentHashMap<String, ClientHandler> clientHandlerList;
+
     private long min;
     private long max;
     private String ip;
-    private int port;
 
     public long getMin() {
         return min;
@@ -50,22 +59,61 @@ public class StreamServer extends Server {
         this.port = port;
     }
 
-    public StreamServer() {
-    }
+    public StreamServer(long min, long max, String ip, int port) throws Exception {
 
-    public StreamServer(long min, long max, String ip, int port) {
+        masterCommunicator = new StreamMasterCommunicator(this);
+        clientHandlerList = new ConcurrentHashMap<String, ClientHandler>();
+
         this.min = min;
         this.max = max;
         this.ip = ip;
         this.port = port;
     }
 
+    public StreamServer(String ip, int port) throws Exception {
+        masterCommunicator = new StreamMasterCommunicator(this);
+        clientHandlerList = new ConcurrentHashMap<String, ClientHandler>();
+        this.ip = ip;
+        this.port = port;
+        this.min = 0;
+        this.max = 0;
+    }
+
     @Override
-    public void run(){
+    public void run() {
+        try {
+            if (!masterCommunicator.connect("passwordkey")) {
+                System.out.println("stream: not conn");
+                return;
+            }
+            masterCommunicator.start();
+            masterCommunicator.setStatus("getMin", 1);
+            masterCommunicator.setStatus("getMax", 1);
+
+            while ((min == 0) && (max == 0)) {
+                Thread.sleep(1000);
+            }
+            System.out.println("stream: min max ok");
+
+            servSocket = new ServerSocket(port);
+            while (true) {
+                clientSocket = servSocket.accept();
+                System.out.println("stream: new client");
+                //ClientHandler clientHandler = new ClientHandler();
+                //clientHandler.start();
+                clientSocket.close();
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
-    
-    public void updateStreamMin(Long Min){
+
+    public void updateStreamMin(Long min) {
+        this.min = min;
     }
-        public void updateStreamMax(Long Max){
+
+    public void updateStreamMax(Long max) {
+        this.max = max;
     }
 }

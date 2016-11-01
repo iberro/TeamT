@@ -16,7 +16,7 @@ public class Lead {
      */
     public static void main(String[] args) {
         try {
-            StreamServer loginServer = new StreamServer();
+            StreamServer loginServer = new StreamServer("127.0.0.1", 12345);
             loginServer.start();
         } catch (Exception ex) {
             ex.printStackTrace();
