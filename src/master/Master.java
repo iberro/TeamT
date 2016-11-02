@@ -26,13 +26,13 @@ public class Master extends Thread {
     private int PORT = 1234;
     private Socket clientSocket;
 
-    private ConcurrentHashMap<String, Handler> loginHandlerList;
-    private ConcurrentHashMap<String, Handler> streamHandlerList;
+    private ConcurrentHashMap<String, LoginHandler> loginHandlerList;
+    private ConcurrentHashMap<String, StreamHandler> streamHandlerList;
 
     public Master() {
         System.out.println("Master: Construct");
-        loginHandlerList = new ConcurrentHashMap<String, Handler>();
-        streamHandlerList = new ConcurrentHashMap<String, Handler>();
+        loginHandlerList = new ConcurrentHashMap<String, LoginHandler>();
+        streamHandlerList = new ConcurrentHashMap<String, StreamHandler>();
     }
 
     @Override
@@ -70,11 +70,11 @@ public class Master extends Thread {
                     }
                     switch (msgRecv[1].toLowerCase()) {
                         case "login":
-                            LoginHandler newLogin = new LoginHandler(loginHandlerList, clientSocket);
+                            LoginHandler newLogin = new LoginHandler(loginHandlerList, streamHandlerList, clientSocket);
                             newLogin.start();
                             break;
                         case "stream":
-                            StreamHandler newStream = new StreamHandler(streamHandlerList, clientSocket);
+                            StreamHandler newStream = new StreamHandler(loginHandlerList, streamHandlerList, clientSocket);
                             newStream.start();
                             break;
                         default:

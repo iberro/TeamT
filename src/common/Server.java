@@ -11,7 +11,7 @@ package common;
  */
 public class Server extends Thread{
 
-    public void addStream(String string, int parseInt, long parseLong, long parseLong0) {
+    public void addStream(String string, int parseInt, int parseLong, int parseLong0) {
         throw new UnsupportedOperationException("Not supported.");
     }
 
@@ -19,11 +19,11 @@ public class Server extends Thread{
         throw new UnsupportedOperationException("Not supported."); 
     }
 
-    public void updateStreamMin(String string, int parseInt, long parseLong) {
+    public void updateStreamMin(String string, int parseInt, int parseLong) {
         throw new UnsupportedOperationException("Not supported.");
     }
 
-    public void updateStreamMax(String string, int parseInt, long parseLong) {
+    public void updateStreamMax(String string, int parseInt, int parseLong) {
         throw new UnsupportedOperationException("Not supported.");
     }
     

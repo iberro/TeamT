@@ -17,13 +17,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LoginHandler extends Handler {
 
-    public LoginHandler(ConcurrentHashMap<String, Handler> loginHandlerList, Socket socket) throws Exception{
-        super(loginHandlerList, socket);
+    public LoginHandler(
+            ConcurrentHashMap<String, LoginHandler> loginHandlerList,
+            ConcurrentHashMap<String, StreamHandler> streamHandlerList,
+            Socket socket) throws Exception{
+        super(loginHandlerList, streamHandlerList, socket);
         handleType = HandleType.Login;
     }
     
-    private boolean setStatus(){
-        System.out.println("Child 2");
+    @Override
+    protected boolean setStatus(String cmd){
+        System.out.println("setStatus " + cmd);
         return true;
     }
 }

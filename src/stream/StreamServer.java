@@ -23,15 +23,15 @@ public class StreamServer extends Server {
     private StreamMasterCommunicator masterCommunicator;
     private ConcurrentHashMap<String, ClientHandler> clientHandlerList;
 
-    private long min;
-    private long max;
+    private int min;
+    private int max;
     private String ip;
 
     public long getMin() {
         return min;
     }
 
-    public void setMin(long min) {
+    public void setMin(int min) {
         this.min = min;
     }
 
@@ -39,7 +39,7 @@ public class StreamServer extends Server {
         return max;
     }
 
-    public void setMax(long max) {
+    public void setMax(int max) {
         this.max = max;
     }
 
@@ -59,25 +59,17 @@ public class StreamServer extends Server {
         this.port = port;
     }
 
-    public StreamServer(long min, long max, String ip, int port) throws Exception {
-
-        masterCommunicator = new StreamMasterCommunicator(this);
-        clientHandlerList = new ConcurrentHashMap<String, ClientHandler>();
-
-        this.min = min;
-        this.max = max;
-        this.ip = ip;
-        this.port = port;
-    }
-
     public StreamServer(String ip, int port) throws Exception {
+
         masterCommunicator = new StreamMasterCommunicator(this);
         clientHandlerList = new ConcurrentHashMap<String, ClientHandler>();
+
         this.ip = ip;
         this.port = port;
-        this.min = 0;
+                this.min = 0;
         this.max = 0;
     }
+
 
     @Override
     public void run() {
@@ -109,11 +101,11 @@ public class StreamServer extends Server {
         }
     }
 
-    public void updateStreamMin(Long min) {
+    public void updateStreamMin(int min) {
         this.min = min;
     }
 
-    public void updateStreamMax(Long max) {
+    public void updateStreamMax(int max) {
         this.max = max;
     }
 }

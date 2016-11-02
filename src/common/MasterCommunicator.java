@@ -61,11 +61,11 @@ public class MasterCommunicator extends Thread{
         return true;
     }
 
-    private boolean handleCommand(String msg) throws Exception {
+    protected boolean handleCommand(String msg) throws Exception {
         return false;
     }
 
-    public boolean setStatus(String status, int priority) throws Exception {
+    public synchronized boolean setStatus(String status, int priority) throws Exception {
         output.println("SetStatus " + status + " " + Integer.toString(priority));
         System.out.println("SetStatus " + status + " " + Integer.toString(priority));
         if (input.hasNextLine() && !isOK(input.nextLine())) {

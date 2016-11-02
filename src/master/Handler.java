@@ -17,7 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Handler extends Thread {
 
-    protected ConcurrentHashMap<String, Handler> handlerList;
+    protected ConcurrentHashMap<String, LoginHandler> loginHandlerList;
+    protected ConcurrentHashMap<String, StreamHandler> streamHandlerList;
 
     protected Socket socket;
     protected PrintWriter output;
@@ -32,9 +33,13 @@ public class Handler extends Thread {
     };
     protected HandleType handleType;
 
-    public Handler(ConcurrentHashMap<String, Handler> loginHandlerList, Socket socket) throws Exception {
+    public Handler(
+            ConcurrentHashMap<String, LoginHandler> loginHandlerList,
+            ConcurrentHashMap<String, StreamHandler> streamHandlerList,
+            Socket socket) throws Exception {
         System.out.println("Handler: const");
-        this.handlerList = loginHandlerList;
+        this.loginHandlerList = loginHandlerList;
+        this.streamHandlerList = streamHandlerList;
         this.socket = socket;
 
         output = new PrintWriter(socket.getOutputStream(), true);
@@ -50,6 +55,11 @@ public class Handler extends Thread {
                 endConnection();
                 return;
             };
+            if (handleType == HandleType.Login) {
+                for (StreamHandler handler : streamHandlerList.values()) {
+                    update("update " + handler.ip + ":" + handler.port + " " + handler.getMin() + " " + handler.getMax());
+                }
+            }
             while (input.hasNextLine()) {
                 if (!handleCommand(input.nextLine())) {
                     return;
@@ -63,7 +73,7 @@ public class Handler extends Thread {
     }
 
     private boolean authentication(String msg) {
-        System.out.println("Handler: " + msg.toString());
+        System.out.println("Handler: " + msg);
         String cmd[] = msg.split(" ");
         if (cmd.length != 2 || !cmd[0].toLowerCase().equals("key")) {
             return false;
@@ -77,7 +87,7 @@ public class Handler extends Thread {
     }
 
     private void disconnect() throws Exception {
-        handlerList.remove(Long.toString(id));
+        removeHandler();
         endConnection("+OK");
     }
 
@@ -93,7 +103,7 @@ public class Handler extends Thread {
                 disconnect();
                 return false;
             case "setstatus":
-                if (setStatus()) {
+                if (setStatus(cmd[1])) {
                     sendMessage("+OK");
                 } else {
                     sendMessage("-NOK");
@@ -121,15 +131,28 @@ public class Handler extends Thread {
     }
 
     private void addHandler() {
-        handlerList.put(Long.toString(id), this);
+        if (handleType == HandleType.Login) {
+            loginHandlerList.put(Long.toString(id), (LoginHandler) this);
+        } else {
+            streamHandlerList.put(Long.toString(id), (StreamHandler) this);
+        }
     }
 
     private void removeHandler() {
-        handlerList.remove(Long.toString(id));
+        if (handleType == HandleType.Login) {
+            loginHandlerList.remove(Long.toString(id));
+        } else {
+            streamHandlerList.remove(Long.toString(id));
+        }
     }
 
-    private boolean setStatus() {
+    protected boolean setStatus(String cmd) {
         System.out.println("Parent");
         return true;
+    }
+
+    protected void update(String msg) {
+        System.out.println("update " + msg);
+        sendMessage("update " + msg);
     }
 }

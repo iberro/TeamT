@@ -20,7 +20,8 @@ public class StreamMasterCommunicator extends MasterCommunicator {
         serverType = ServerType.Stream;
     }
 
-    private boolean handleCommand(String msg) throws Exception {
+    @Override
+    protected boolean handleCommand(String msg) throws Exception {
         System.out.println("Master comm:" + msg);
         String cmd[] = msg.split(" ");
         if (cmd.length == 0) {
@@ -44,7 +45,7 @@ public class StreamMasterCommunicator extends MasterCommunicator {
                         mainServer.updateStreamMin(
                                 cmd[2].split(":")[0],
                                 Integer.parseInt(cmd[2].split(":")[1]),
-                                Long.parseLong(cmd[3]));
+                                Integer.parseInt(cmd[3]));
                         break;
                     case "updateStreamMax":
                         if (cmd.length != 4) {
@@ -53,7 +54,7 @@ public class StreamMasterCommunicator extends MasterCommunicator {
                         mainServer.updateStreamMax(
                                 cmd[2].split(":")[0],
                                 Integer.parseInt(cmd[2].split(":")[1]),
-                                Long.parseLong(cmd[3]));
+                                Integer.parseInt(cmd[3]));
                         break;
                     default:
                         break;

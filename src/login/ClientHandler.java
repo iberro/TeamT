@@ -64,7 +64,7 @@ public class ClientHandler extends Thread {
         if (!cmd[2].equals("key")) {
             return false;
         }
-        StreamAddr stream = loginServer.getStream(Long.parseLong(cmd[3]));
+        StreamAddr stream = loginServer.getStream(Integer.parseInt(cmd[3]));
         sendMessage(stream.getIp() + ":" + Integer.toString(stream.getPort()));
         return true;
     }

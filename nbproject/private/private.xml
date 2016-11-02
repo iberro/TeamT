@@ -3,11 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Ihab%20BERRO/OneDrive/Documents/TeamT/src/stream/StreamMasterCommunicator.java</file>
-            <file>file:/C:/Users/Ihab%20BERRO/OneDrive/Documents/TeamT/src/master/Handler.java</file>
+            <file>file:/C:/Users/Ihab%20BERRO/OneDrive/Documents/TeamT/src/common/MasterCommunicator.java</file>
             <file>file:/C:/Users/Ihab%20BERRO/OneDrive/Documents/TeamT/src/stream/StreamServer.java</file>
+            <file>file:/C:/Users/Ihab%20BERRO/OneDrive/Documents/TeamT/src/master/Lead.java</file>
             <file>file:/C:/Users/Ihab%20BERRO/OneDrive/Documents/TeamT/src/stream/Lead.java</file>
-            <file>file:/C:/Users/Ihab%20BERRO/OneDrive/Documents/TeamT/src/master/StreamHandler.java</file>
         </group>
     </open-files>
 </project-private>

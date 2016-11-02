@@ -64,7 +64,7 @@ public class LoginServer extends Server {
     }
 
     @Override
-    public void addStream(String ip, int port, long min, long max) {
+    public void addStream(String ip, int port, int min, int max) {
         lockArray.lock();
         System.out.println("Login add stream: " + ip + Integer.toString(port) + Long.toString(min) + Long.toString(max));
         if (max > streamArray.get(0).getMin()) {
@@ -98,7 +98,7 @@ public class LoginServer extends Server {
     }
 
     @Override
-    public void updateStreamMin(String ip, int port, long newMin) {
+    public void updateStreamMin(String ip, int port, int newMin) {
         lockArray.lock();
         System.out.println("Login update min stream: " + ip + Integer.toString(port) + Long.toString(newMin));
         for (StreamAddr stream : streamArray) {
@@ -112,7 +112,7 @@ public class LoginServer extends Server {
     }
 
     @Override
-    public void updateStreamMax(String ip, int port, long newMax) {
+    public void updateStreamMax(String ip, int port, int newMax) {
         lockArray.lock();
         try {
             System.out.println("Login update max stream: " + ip + Integer.toString(port) + Long.toString(newMax));
