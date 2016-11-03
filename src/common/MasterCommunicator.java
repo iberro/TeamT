@@ -8,22 +8,25 @@ package common;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+
 /**
  *
  * @author Ihab BERRO
  */
-public class MasterCommunicator extends Thread{
+public class MasterCommunicator extends Thread {
+
     protected Socket clientSoccket;
     protected int serverPort;
     protected PrintWriter output;
     protected Scanner input;
 
     protected Server mainServer;
+
     protected enum ServerType {
         Login, Stream
     };
     protected ServerType serverType;
-    
+
     public MasterCommunicator(Server mainServer) throws Exception {
         clientSoccket = new Socket("127.0.0.1", 1234);
         output = new PrintWriter(clientSoccket.getOutputStream(), true);
@@ -46,14 +49,16 @@ public class MasterCommunicator extends Thread{
     }
 
     public boolean connect(String key) throws Exception {
-
+        System.out.println("Connect");
         if (input.hasNextLine() && !isOK(input.nextLine())) {
             return false;
         }
+        System.out.println("ConnectAs " + serverType.toString());
         output.println("ConnectAs " + serverType.toString());
         if (input.hasNextLine() && !isOK(input.nextLine())) {
             return false;
         }
+        System.out.println("Key " + key);
         output.println("Key " + key);
         if (input.hasNextLine() && !isOK(input.nextLine())) {
             return false;
@@ -68,9 +73,9 @@ public class MasterCommunicator extends Thread{
     public synchronized boolean setStatus(String status, int priority) throws Exception {
         output.println("SetStatus " + status + " " + Integer.toString(priority));
         System.out.println("SetStatus " + status + " " + Integer.toString(priority));
-        if (input.hasNextLine() && !isOK(input.nextLine())) {
-            return false;
-        }
+        //if (input.hasNextLine() && !isOK(input.nextLine())) {
+        //    return false;
+        //}
         return true;
     }
 

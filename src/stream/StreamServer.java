@@ -66,10 +66,9 @@ public class StreamServer extends Server {
 
         this.ip = ip;
         this.port = port;
-                this.min = 0;
+        this.min = 0;
         this.max = 0;
     }
-
 
     @Override
     public void run() {

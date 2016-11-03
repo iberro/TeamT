@@ -53,8 +53,10 @@ public class StreamHandler extends Handler {
         switch (cmd.toLowerCase()) {
             case "getmin":
                 update("updateStreamMin " + Integer.toString(min));
+                break;
             case "getmax":
                 update("updateStreamMax " + Integer.toString(max));
+                break;
         }
         return true;
     }

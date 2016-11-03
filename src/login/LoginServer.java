@@ -26,7 +26,7 @@ import master.StreamHandler;
 public class LoginServer extends Server {
 
     private ServerSocket servSocket;
-    private int PORT = 1235;
+    private int PORT = 1239;
     private Socket clientSocket;
 
     private LoginMasterCommunicator masterCommunicator;
