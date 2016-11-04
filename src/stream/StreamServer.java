@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StreamServer extends Server {
 
     private ServerSocket servSocket;
-    private int port = 1235;
+    private int port;
     private Socket clientSocket;
 
     private StreamMasterCommunicator masterCommunicator;
@@ -59,12 +59,15 @@ public class StreamServer extends Server {
         this.port = port;
     }
 
-    public StreamServer(String ip, int port) throws Exception {
+    public StreamServer(String masterIP, int port) throws Exception {
 
-        masterCommunicator = new StreamMasterCommunicator(this);
-        clientHandlerList = new ConcurrentHashMap<String, ClientHandler>();
+        masterCommunicator = new StreamMasterCommunicator(masterIP, this);
+        clientHandlerList = new ConcurrentHashMap<>();
 
-        this.ip = ip;
+        //get local host ip
+        //
+        //
+        this.ip = "127.0.0.1";
         this.port = port;
         this.min = 0;
         this.max = 0;
@@ -78,6 +81,8 @@ public class StreamServer extends Server {
                 return;
             }
             masterCommunicator.start();
+            //masterCommunicator.setStatus("setip", 1);
+            //masterCommunicator.setStatus("setport", 1);
             masterCommunicator.setStatus("getMin", 1);
             masterCommunicator.setStatus("getMax", 1);
 

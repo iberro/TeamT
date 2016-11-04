@@ -15,24 +15,43 @@ import java.util.Scanner;
  */
 public class MasterCommunicator extends Thread {
 
-    protected Socket clientSoccket;
+    protected Socket masterSoccket;
     protected int serverPort;
     protected PrintWriter output;
     protected Scanner input;
 
     protected Server mainServer;
+    private final int masterPORT = 1234;
 
     protected enum ServerType {
         Login, Stream
     };
     protected ServerType serverType;
 
-    public MasterCommunicator(Server mainServer) throws Exception {
-        clientSoccket = new Socket("127.0.0.1", 1234);
-        output = new PrintWriter(clientSoccket.getOutputStream(), true);
-        input = new Scanner(clientSoccket.getInputStream());
+    public MasterCommunicator(String masterIP, Server mainServer) throws Exception {
+
+        masterSoccket = new Socket(masterIP, masterPORT);
+        output = new PrintWriter(masterSoccket.getOutputStream(), true);
+        input = new Scanner(masterSoccket.getInputStream());
 
         this.mainServer = mainServer;
+    }
+
+    protected void sendMessage(String msg) {
+        output.println(msg);
+    }
+
+    private boolean isOK(String msg) {
+        System.out.println("Master comm:" + msg);
+        if (!msg.toLowerCase().equals("+ok")) {
+            return false;
+        }
+        return true;
+    }
+
+    public void setStatus(String status, int priority) throws Exception {
+        sendMessage("SetStatus " + status + " " + Integer.toString(priority));
+        System.out.println("SetStatus " + status + " " + Integer.toString(priority));
     }
 
     @Override
@@ -54,12 +73,12 @@ public class MasterCommunicator extends Thread {
             return false;
         }
         System.out.println("ConnectAs " + serverType.toString());
-        output.println("ConnectAs " + serverType.toString());
+        sendMessage("ConnectAs " + serverType.toString());
         if (input.hasNextLine() && !isOK(input.nextLine())) {
             return false;
         }
         System.out.println("Key " + key);
-        output.println("Key " + key);
+        sendMessage("Key " + key);
         if (input.hasNextLine() && !isOK(input.nextLine())) {
             return false;
         }
@@ -68,22 +87,5 @@ public class MasterCommunicator extends Thread {
 
     protected boolean handleCommand(String msg) throws Exception {
         return false;
-    }
-
-    public synchronized boolean setStatus(String status, int priority) throws Exception {
-        output.println("SetStatus " + status + " " + Integer.toString(priority));
-        System.out.println("SetStatus " + status + " " + Integer.toString(priority));
-        //if (input.hasNextLine() && !isOK(input.nextLine())) {
-        //    return false;
-        //}
-        return true;
-    }
-
-    private boolean isOK(String msg) {
-        System.out.println("Master comm:" + msg);
-        if (!msg.toLowerCase().equals("+ok")) {
-            return false;
-        }
-        return true;
     }
 }

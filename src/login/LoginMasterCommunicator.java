@@ -14,10 +14,55 @@ import common.MasterCommunicator;
  */
 public class LoginMasterCommunicator extends MasterCommunicator {
 
-    public LoginMasterCommunicator(LoginServer loginServer) throws Exception {
-        super(loginServer);
-
+    public LoginMasterCommunicator(String masterIP, LoginServer loginServer) throws Exception {
+        super(masterIP, loginServer);
         serverType = ServerType.Login;
+    }
+
+    private void rcvUpdate(String cmd[]) {
+
+        if ((cmd == null) || (cmd.length < 2)) {
+            return;
+        }
+        switch (cmd[1].toLowerCase()) {
+            case "addstream":
+                if (cmd.length != 5) {
+                    return ;
+                }
+                mainServer.addStream(
+                        cmd[2].split(":")[0],
+                        Integer.parseInt(cmd[2].split(":")[1]),
+                        Integer.parseInt(cmd[3]), Integer.parseInt(cmd[4]));
+                break;
+            case "removestream":
+                if (cmd.length != 3) {
+                    return;
+                }
+                mainServer.removeStream(
+                        cmd[2].split(":")[0],
+                        Integer.parseInt(cmd[2].split(":")[1]));
+                break;
+            case "updatestreammin":
+                if (cmd.length != 4) {
+                    return;
+                }
+                mainServer.updateStreamMin(
+                        cmd[2].split(":")[0],
+                        Integer.parseInt(cmd[2].split(":")[1]),
+                        Integer.parseInt(cmd[3]));
+                break;
+            case "updatestreammax":
+                if (cmd.length != 4) {
+                    return;
+                }
+                mainServer.updateStreamMax(
+                        cmd[2].split(":")[0],
+                        Integer.parseInt(cmd[2].split(":")[1]),
+                        Integer.parseInt(cmd[3]));
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -25,58 +70,17 @@ public class LoginMasterCommunicator extends MasterCommunicator {
         System.out.println("Master comm:" + msg);
         String cmd[] = msg.split(" ");
         if (cmd.length == 0) {
-            return false;
+            return true;
         }
         switch (cmd[0].toLowerCase()) {
-            case "getStatus":
+            case "getstatus":
+                //
                 //
                 //
                 setStatus("Normal", 10);
                 break;
             case "update":
-                if (cmd.length < 2) {
-                    return true;
-                }
-                switch (cmd[1]) {
-                    case "addStream":
-                        if (cmd.length != 5) {
-                            return true;
-                        }
-                        mainServer.addStream(
-                                cmd[2].split(":")[0],
-                                Integer.parseInt(cmd[2].split(":")[1]),
-                                Integer.parseInt(cmd[3]),
-                                Integer.parseInt(cmd[4]));
-                        break;
-                    case "removeStream":
-                        if (cmd.length != 3) {
-                            return true;
-                        }
-                        mainServer.removeStream(
-                                cmd[2].split(":")[0],
-                                Integer.parseInt(cmd[2].split(":")[1]));
-                        break;
-                    case "updateStreamMin":
-                        if (cmd.length != 4) {
-                            return true;
-                        }
-                        mainServer.updateStreamMin(
-                                cmd[2].split(":")[0],
-                                Integer.parseInt(cmd[2].split(":")[1]),
-                                Integer.parseInt(cmd[3]));
-                        break;
-                    case "updateStreamMax":
-                        if (cmd.length != 4) {
-                            return true;
-                        }
-                        mainServer.updateStreamMax(
-                                cmd[2].split(":")[0],
-                                Integer.parseInt(cmd[2].split(":")[1]),
-                                Integer.parseInt(cmd[3]));
-                        break;
-                    default:
-                        break;
-                }
+                rcvUpdate(cmd);
                 break;
             default:
                 break;

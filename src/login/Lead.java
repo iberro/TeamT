@@ -15,8 +15,12 @@ public class Lead {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        int loginServerPORT = 1237;
+        String masterAddress = "127.0.0.1";
+        
         try {
-            LoginServer loginServer = new LoginServer();
+            LoginServer loginServer = new LoginServer(masterAddress, loginServerPORT);
             loginServer.start();
         } catch (Exception ex) {
             ex.printStackTrace();

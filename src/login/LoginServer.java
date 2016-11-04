@@ -26,7 +26,7 @@ import master.StreamHandler;
 public class LoginServer extends Server {
 
     private ServerSocket servSocket;
-    private int PORT = 1239;
+    private int port;
     private Socket clientSocket;
 
     private LoginMasterCommunicator masterCommunicator;
@@ -34,11 +34,12 @@ public class LoginServer extends Server {
     private ConcurrentHashMap<String, ClientHandler> clientHandlerList;
     private Lock lockArray;
 
-    public LoginServer() throws Exception {
-        masterCommunicator = new LoginMasterCommunicator(this);
-        clientHandlerList = new ConcurrentHashMap<String, ClientHandler>();
-
-        streamArray = new ArrayList<StreamAddr>();
+    public LoginServer(String masterAddress, int loginServerPORT) throws Exception {
+        port = loginServerPORT;
+        masterCommunicator = new LoginMasterCommunicator(masterAddress, this);
+        
+        clientHandlerList = new ConcurrentHashMap<>();
+        streamArray = new ArrayList<>();
     }
 
     @Override
@@ -50,7 +51,7 @@ public class LoginServer extends Server {
             }
             masterCommunicator.start();
 
-            servSocket = new ServerSocket(PORT);
+            servSocket = new ServerSocket(port);
             while (true) {
                 clientSocket = servSocket.accept();
                 System.out.println("Login: new client");

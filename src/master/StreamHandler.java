@@ -45,6 +45,11 @@ public class StreamHandler extends Handler {
         //
         min = streamHandlerList.size()*1000;
         max = min +999;
+        
+        //Update Login info
+        for(LoginHandler loginHandler : loginHandlerList.values()){
+            loginHandler.update("addStream " + ip + ":" + Integer.toString(port) + " " + Integer.toString(min) + " " + Integer.toString(max));
+        }
     }
 
     @Override

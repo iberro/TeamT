@@ -126,7 +126,8 @@ public class Handler extends Thread {
         socket.close();
     }
 
-    private void sendMessage(String msg) {
+    public void sendMessage(String msg) {
+        System.out.println("sendMessage: " + msg);
         output.println(msg);
     }
 
