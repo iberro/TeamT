@@ -8,6 +8,7 @@ package stream;
 import common.Server;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -21,7 +22,7 @@ public class StreamServer extends Server {
     private Socket clientSocket;
 
     private StreamMasterCommunicator masterCommunicator;
-    private ConcurrentHashMap<String, ClientHandler> clientHandlerList;
+    private ConcurrentHashMap<String, ArrayList<ClientHandler>> clientHandlerList;
 
     private int min;
     private int max;
@@ -67,7 +68,7 @@ public class StreamServer extends Server {
         //get local host ip
         //
         //
-        this.ip = "127.0.0.1";
+        this.ip = "192.168.1.131";
         this.port = port;
         this.min = 0;
         this.max = 0;
@@ -81,11 +82,10 @@ public class StreamServer extends Server {
                 return;
             }
             masterCommunicator.start();
-            //masterCommunicator.setStatus("setip", 1);
-            //masterCommunicator.setStatus("setport", 1);
             masterCommunicator.setStatus("getMin", 1);
             masterCommunicator.setStatus("getMax", 1);
-
+            masterCommunicator.setStatus("setip:" + ip, 1);
+            masterCommunicator.setStatus("setport:" + port, 1);
             while ((min == 0) && (max == 0)) {
                 Thread.sleep(1000);
             }
@@ -95,8 +95,8 @@ public class StreamServer extends Server {
             while (true) {
                 clientSocket = servSocket.accept();
                 System.out.println("stream: new client");
-                //ClientHandler clientHandler = new ClientHandler();
-                //clientHandler.start();
+                ClientHandler clientHandler = new ClientHandler(clientSocket, clientHandlerList);
+                clientHandler.start();
                 clientSocket.close();
             }
 

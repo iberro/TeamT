@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import master.LoginHandler;
 import master.StreamHandler;
 
@@ -32,7 +33,7 @@ public class LoginServer extends Server {
     private LoginMasterCommunicator masterCommunicator;
     private ArrayList<StreamAddr> streamArray;
     private ConcurrentHashMap<String, ClientHandler> clientHandlerList;
-    private Lock lockArray;
+    private ReentrantLock lockArray;
 
     public LoginServer(String masterAddress, int loginServerPORT) throws Exception {
         port = loginServerPORT;
@@ -40,6 +41,8 @@ public class LoginServer extends Server {
         
         clientHandlerList = new ConcurrentHashMap<>();
         streamArray = new ArrayList<>();
+        
+        lockArray = new ReentrantLock();
     }
 
     @Override
@@ -68,7 +71,7 @@ public class LoginServer extends Server {
     public void addStream(String ip, int port, int min, int max) {
         lockArray.lock();
         System.out.println("Login add stream: " + ip + Integer.toString(port) + Long.toString(min) + Long.toString(max));
-        if (max > streamArray.get(0).getMin()) {
+        if ((streamArray.size()>0) &&(max > streamArray.get(0).getMin())) {
             streamArray.add(0, new StreamAddr(min, max, ip, port));
             lockArray.unlock();
             return;

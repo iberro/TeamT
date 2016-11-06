@@ -58,10 +58,10 @@ public class ClientHandler extends Thread {
         if (cmd.length != 4 || !cmd[0].toLowerCase().equals("signin")) {
             return false;
         }
-        if (!cmd[1].equals("client")) {
+        if (!cmd[1].toLowerCase().equals("client")) {
             return false;
         }
-        if (!cmd[2].equals("key")) {
+        if (!cmd[2].toLowerCase().equals("key")) {
             return false;
         }
         StreamAddr stream = loginServer.getStream(Integer.parseInt(cmd[3]));

@@ -16,7 +16,7 @@ public class Lead {
      */
     public static void main(String[] args) {
         
-        int loginServerPORT = 1237;
+        int loginServerPORT = 1235;
         String masterAddress = "127.0.0.1";
         
         try {

@@ -39,17 +39,13 @@ public class StreamHandler extends Handler {
             Socket socket) throws Exception {
         super(loginHandlerList, streamHandlerList, socket);
         handleType = HandleType.Stream;
-        
+
         //To Change
         //
         //
-        min = streamHandlerList.size()*1000;
-        max = min +999;
-        
-        //Update Login info
-        for(LoginHandler loginHandler : loginHandlerList.values()){
-            loginHandler.update("addStream " + ip + ":" + Integer.toString(port) + " " + Integer.toString(min) + " " + Integer.toString(max));
-        }
+        min = streamHandlerList.size() * 1000;
+        max = min + 999;
+
     }
 
     @Override
@@ -61,6 +57,20 @@ public class StreamHandler extends Handler {
                 break;
             case "getmax":
                 update("updateStreamMax " + Integer.toString(max));
+                break;
+            default:
+                switch (cmd.toLowerCase().split(":")[0]) {
+                    case "setip":
+                        ip = cmd.split(":")[1];
+                        break;
+                    case "setport":
+                        port = Integer.parseInt(cmd.split(":")[1]);
+                        //Update Login info
+                        for (LoginHandler loginHandler : loginHandlerList.values()) {
+                            loginHandler.update("addStream " + ip + ":" + Integer.toString(port) + " " + Integer.toString(min) + " " + Integer.toString(max));
+                        }
+                        break;
+                }
                 break;
         }
         return true;
