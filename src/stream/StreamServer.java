@@ -6,6 +6,8 @@
 package stream;
 
 import common.Server;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -64,6 +66,7 @@ public class StreamServer extends Server {
 
         masterCommunicator = new StreamMasterCommunicator(masterIP, this);
         clientHandlerList = new ConcurrentHashMap<>();
+        initClientList();
 
         //get local host ip
         //
@@ -86,9 +89,9 @@ public class StreamServer extends Server {
             masterCommunicator.setStatus("getMax", 1);
             masterCommunicator.setStatus("setip:" + ip, 1);
             masterCommunicator.setStatus("setport:" + port, 1);
-            while ((min == 0) && (max == 0)) {
-                Thread.sleep(1000);
-            }
+            //while ((min == 0) || (max == 0)) {
+            //    Thread.sleep(1000);
+            //}
             System.out.println("stream: min max ok");
 
             servSocket = new ServerSocket(port);
@@ -111,5 +114,34 @@ public class StreamServer extends Server {
 
     public void updateStreamMax(int max) {
         this.max = max;
+    }
+
+    private void initClientList() {
+        for (int i = min; i <= max; i++) {
+            clientHandlerList.put(Integer.toString(i), new ArrayList<ClientHandler>());
+        }
+    }
+
+    public class Broadcaster extends Thread {
+
+        ConcurrentHashMap<String, ArrayList<ClientHandler>> clientHandlerList;
+        int port;
+        DatagramSocket udpSocket;
+        DatagramPacket udpPacket;
+
+        public Broadcaster(ConcurrentHashMap<String, ArrayList<ClientHandler>> clientHandlerList, int port) {
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (true) {
+                    
+                    udpSocket.receive(udpPacket);
+                    
+                }
+            } catch (Exception ex) {
+            }
+        }
     }
 }

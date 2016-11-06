@@ -143,4 +143,8 @@ public class LoginServer extends Server {
         lockArray.unlock();
         return null;
     }
+    
+    private void initClientList(){
+        
+    }
 }

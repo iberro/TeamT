@@ -22,11 +22,69 @@ public class ClientHandler extends Thread {
     private PrintWriter output;
     private Scanner input;
 
+    private int freq;
+
     public ClientHandler(Socket clientSocket, ConcurrentHashMap<String, ArrayList<ClientHandler>> clientHandlerList) {
         this.socket = clientSocket;
         this.clientHandlerList = clientHandlerList;
     }
 
     public void run() {
+        try {
+            sendMessage("+OK");
+            if (input.hasNextLine() && !authentication(input.nextLine())) {
+                endConnection();
+                return;
+            };
+            
+            while(true){
+                if (input.hasNextLine()){
+                
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private boolean authentication(String msg) {
+        String cmd[] = msg.split(" ");
+
+        if (cmd.length != 4 || !cmd[0].toLowerCase().equals("signin")) {
+            return false;
+        }
+        if (!cmd[1].toLowerCase().equals("client")) {
+            return false;
+        }
+        if (!cmd[2].toLowerCase().equals("key")) {
+            return false;
+        }
+        addHandler(Integer.parseInt(cmd[3]));
+        return true;
+    }
+    
+    private void addHandler(int freq) {
+        this.freq = freq;
+        clientHandlerList.get(freq).add(this);
+        System.out.println("Client added: " + freq);
+    }
+    
+    private void disconnect() throws Exception {
+        //removeHandler();
+        endConnection("+OK");
+    }
+
+    private void endConnection() throws Exception {
+        sendMessage("-NOK");
+        socket.close();
+    }
+
+    private void endConnection(String msg) throws Exception {
+        sendMessage(msg);
+        socket.close();
+    }
+
+    private void sendMessage(String msg) {
+        output.println(msg);
     }
 }
