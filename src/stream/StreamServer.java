@@ -22,6 +22,7 @@ public class StreamServer extends Server {
     private ServerSocket servSocket;
     private int port;
     private Socket clientSocket;
+    private Broadcaster broadcaster;
 
     private StreamMasterCommunicator masterCommunicator;
     private ConcurrentHashMap<String, ArrayList<ClientHandler>> clientHandlerList;
@@ -94,6 +95,9 @@ public class StreamServer extends Server {
             //}
             System.out.println("stream: min max ok");
 
+            broadcaster = new Broadcaster(clientHandlerList, port + 1);
+            broadcaster.start();
+
             servSocket = new ServerSocket(port);
             while (true) {
                 clientSocket = servSocket.accept();
@@ -128,19 +132,27 @@ public class StreamServer extends Server {
         int port;
         DatagramSocket udpSocket;
         DatagramPacket udpPacket;
+        byte[] buf = new byte[256];
 
-        public Broadcaster(ConcurrentHashMap<String, ArrayList<ClientHandler>> clientHandlerList, int port) {
+        public Broadcaster(ConcurrentHashMap<String, ArrayList<ClientHandler>> clientHandlerList, int port) throws Exception{
+            System.out.println("init broadcaster");
+            udpSocket = new DatagramSocket(port);
         }
 
         @Override
         public void run() {
+            System.out.println("start broadcaster");
             try {
+                
                 while (true) {
-                    
+                    byte[] buf = new byte[256];
+                    udpPacket = new DatagramPacket(buf, 256);
                     udpSocket.receive(udpPacket);
-                    
+                    udpPacket.getData();
+                    System.out.println("udp receve");
                 }
             } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
     }
