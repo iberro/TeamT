@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -24,12 +25,24 @@ public class MainActivity extends AppCompatActivity {
     int loginPort;
     String streamIP;
     int streamPort;
-    Brodcaster brodcaster;
+
 
     StreamThread streamThread;
 
-    DatagramSocket udpSocket;
-    DatagramPacket udpPacket;
+    //Audio data
+    public byte[] buffer;
+    public static DatagramSocket udpSocket;
+    public static DatagramPacket udpPacket;
+
+    AudioRecord recorder;
+
+    private int sampleRate = 16000 ;
+    private int channelConfig = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+    private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+    int minBufSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+    private boolean status = true;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,15 +50,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final Button button = (Button) findViewById(R.id.button3);
-        brodcaster = new Brodcaster();
+
+        try {
+            udpSocket = new DatagramSocket();
+        }catch (Exception ex){
+            Log.d("Error", ex.toString());
+            ex.printStackTrace();
+        }
+
         button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
-                    //brodcaster.brodcasting();
+                    status = true;
+                    broadcasting();
                     Log.d("Brodcast", "start");
                 }
                 if(event.getAction() == MotionEvent.ACTION_UP){
+                    status = false;
+                    recorder.release();
                     Log.d("Brodcast", "stop");
                 }
                 return true;
@@ -68,11 +91,38 @@ public class MainActivity extends AppCompatActivity {
         streamThread = new StreamThread();
         streamThread.start();
     }
-    public void startSend(View view){
 
-    }
-    public void stoptSend(View view){
+    public void broadcasting() {
+        Thread broadcastThread = new Thread(new Runnable() {
 
+            @Override
+            public void run() {
+                try {
+
+                    byte[] buffer = new byte[minBufSize];
+
+                    final InetAddress destination = InetAddress.getByName(streamIP);
+
+                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,channelConfig,audioFormat,minBufSize*10);
+                    recorder.startRecording();
+
+                    while(status == true) {
+                        minBufSize = recorder.read(buffer, 0, buffer.length);
+
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+                        outputStream.write(freq);
+                        outputStream.write(buffer);
+                        udpPacket = new DatagramPacket (outputStream.toByteArray(),buffer.length,destination,streamPort+1);
+                        udpSocket.send(udpPacket);
+                    }
+                } catch (Exception ex) {
+                    Log.d("Error", ex.toString());
+                    ex.printStackTrace();
+                }
+            }
+
+        });
+        broadcastThread.start();
     }
 
     public class LoginThread extends Thread{
@@ -127,50 +177,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class Brodcaster{
 
-        public byte[] buffer;
-        public DatagramSocket socket;
-        private int port=50005;
-
-        AudioRecord recorder;
-
-        private int sampleRate = 16000 ;
-        private int channelConfig = AudioFormat.CHANNEL_CONFIGURATION_MONO;
-        private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-        int minBufSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
-        private boolean status = true;
-
-        public Brodcaster(){
-
-        }
-        public void connect(){
-            try {
-                udpSocket = new DatagramSocket(12340);
-            }catch (Exception ex){
-                Log.d("Error ", ex.toString());
-            }
-
-        }
-        public void start() throws Exception{
-            DatagramSocket socket = new DatagramSocket();
-            byte[] buffer = new byte[minBufSize];
-
-            DatagramPacket packet;
-
-            recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,channelConfig,audioFormat,minBufSize*10);
-            recorder.startRecording();
-
-
-            minBufSize = recorder.read(buffer, 0, buffer.length);
-            packet = new DatagramPacket (buffer, buffer.length, InetAddress.getByName(streamIP), streamPort + 1);
-
-            socket.send(packet);
-            recorder.stop();
-        }
-        public void stop(){
-
-        }
-
-    }
 }
