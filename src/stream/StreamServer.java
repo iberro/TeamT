@@ -133,10 +133,16 @@ public class StreamServer extends Server {
         DatagramSocket udpSocket;
         DatagramPacket udpPacket;
         byte[] buf = new byte[256];
-        
-        public Broadcaster(ConcurrentHashMap<String, ArrayList<ClientHandler>> clientHandlerList, int port) throws Exception{
+
+        public Broadcaster(ConcurrentHashMap<String, ArrayList<ClientHandler>> clientHandlerList, int port) throws Exception {
             System.out.println("init broadcaster");
             udpSocket = new DatagramSocket(port);
+        }
+
+        private void broadcasting(String freq, byte[] data) {
+            for (ClientHandler client : clientHandlerList.get(freq)) {
+                //client.s
+            }
         }
 
         @Override
@@ -148,6 +154,7 @@ public class StreamServer extends Server {
                     udpPacket = new DatagramPacket(buf, 256);
                     udpSocket.receive(udpPacket);
                     udpPacket.getData();
+
                     System.out.println("udp receve " + buf[0]);
                 }
             } catch (Exception ex) {
