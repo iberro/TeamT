@@ -27,4 +27,12 @@ public class Server extends Thread{
         throw new UnsupportedOperationException("Not supported.");
     }
     
+    public void updateStreamMin(int parseInt) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public void updateStreamMax(int parseInt) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+    
 }

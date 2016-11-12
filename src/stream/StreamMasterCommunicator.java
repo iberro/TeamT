@@ -26,22 +26,16 @@ public class StreamMasterCommunicator extends MasterCommunicator {
         }
         switch (cmd[1].toLowerCase()) {
             case "updatestreammin":
-                if (cmd.length != 4) {
+                if (cmd.length != 3) {
                     return;
                 }
-                mainServer.updateStreamMin(
-                        cmd[2].split(":")[0],
-                        Integer.parseInt(cmd[2].split(":")[1]),
-                        Integer.parseInt(cmd[3]));
+                mainServer.updateStreamMin(Integer.parseInt(cmd[2]));
                 break;
             case "updatestreammax":
-                if (cmd.length != 4) {
+                if (cmd.length != 3) {
                     return;
                 }
-                mainServer.updateStreamMax(
-                        cmd[2].split(":")[0],
-                        Integer.parseInt(cmd[2].split(":")[1]),
-                        Integer.parseInt(cmd[3]));
+                mainServer.updateStreamMax(Integer.parseInt(cmd[2]));
                 break;
             default:
                 break;

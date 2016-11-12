@@ -67,7 +67,6 @@ public class StreamServer extends Server {
 
         masterCommunicator = new StreamMasterCommunicator(masterIP, this);
         clientHandlerList = new ConcurrentHashMap<>();
-        initClientList();
 
         //get local host ip
         //
@@ -90,10 +89,9 @@ public class StreamServer extends Server {
             masterCommunicator.setStatus("getMax", 1);
             masterCommunicator.setStatus("setip:" + ip, 1);
             masterCommunicator.setStatus("setport:" + port, 1);
-            //while ((min == 0) || (max == 0)) {
-            //    Thread.sleep(1000);
-            //}
-            System.out.println("stream: min max ok");
+            Thread.sleep(1000);
+            System.out.println("stream: min " + min + " max " + max);
+            initClientList();
 
             broadcaster = new Broadcaster(clientHandlerList, port + 1);
             broadcaster.start();
@@ -104,7 +102,7 @@ public class StreamServer extends Server {
                 System.out.println("stream: new client");
                 ClientHandler clientHandler = new ClientHandler(clientSocket, clientHandlerList);
                 clientHandler.start();
-                clientSocket.close();
+                //clientSocket.close();
             }
 
         } catch (Exception ex) {

@@ -11,6 +11,9 @@ import android.view.View;
 import android.widget.Button;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -25,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     int loginPort;
     String streamIP;
     int streamPort;
+    Socket streamSocket;
 
 
     StreamThread streamThread;
@@ -63,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
                     status = true;
-                    broadcasting();
+                    //broadcasting();
+                    _broadcasting();
                     Log.d("Brodcast", "start");
                 }
                 if(event.getAction() == MotionEvent.ACTION_UP){
@@ -79,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
         loginIP = "192.168.1.131";
         loginPort = 1235;
 
-
     }
 
     public void login(View view) {
@@ -90,6 +94,38 @@ public class MainActivity extends AppCompatActivity {
     public void streamLogin(View view) {
         streamThread = new StreamThread();
         streamThread.start();
+        registerUdp();
+    }
+
+    public void registerUdp(){
+
+    }
+
+    public void _broadcasting() {
+        Thread broadcastThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+
+                    byte[] buffer = new byte[minBufSize];
+
+                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,channelConfig,audioFormat,minBufSize*10);
+                    recorder.startRecording();
+                    DataOutputStream output = new DataOutputStream(streamSocket.getOutputStream());
+
+                    while(status == true) {
+                        minBufSize = recorder.read(buffer, 0, buffer.length);
+                        output.write(buffer);
+                    }
+                } catch (Exception ex) {
+                    Log.d("Error", ex.toString());
+                    ex.printStackTrace();
+                }
+            }
+
+        });
+        broadcastThread.start();
     }
 
     public void broadcasting() {
@@ -158,9 +194,9 @@ public class MainActivity extends AppCompatActivity {
         public void run(){
             try {
                 Log.d("stream ","new socket");
-                Socket socket = new Socket(streamIP, streamPort);
-                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-                Scanner input = new Scanner(socket.getInputStream());
+                streamSocket = new Socket(streamIP, streamPort);
+                PrintWriter output = new PrintWriter(streamSocket.getOutputStream(), true);
+                Scanner input = new Scanner(streamSocket.getInputStream());
                 String rcvMsg[];
 
                 if(input.hasNextLine() && !input.nextLine().equals("+OK")){
@@ -171,6 +207,19 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 Log.d("stream ","registred");
+
+                while(true) {
+                    DataInputStream inputData = new DataInputStream(streamSocket.getInputStream());
+
+                    while (true) {
+                        byte[] buf = new byte[640];
+                        inputData.read(buf, 0, 640);
+                        Log.d("stream ", "Data");
+                        AudioData audiodata = new AudioData(byteArray);
+                        AudioDataStream audioStream = new AudioDataStream(audioData);
+                        AudioPlayer.player.start(audioStream);
+                    }
+                }
             } catch (Exception ex) {
                 Log.d("Error ", ex.toString());
             }
