@@ -107,6 +107,7 @@ public class ClientHandler extends Thread {
 
     private void sendData(byte[] data) {
         try {
+            System.out.println("Sending data");
             outputData.write(data);
         } catch (Exception ex) {
             ex.printStackTrace();

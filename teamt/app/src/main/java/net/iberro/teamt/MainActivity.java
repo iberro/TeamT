@@ -1,8 +1,13 @@
 package net.iberro.teamt;
 
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.media.AudioTrack;
+import android.media.MediaDataSource;
 import android.media.MediaRecorder;
+import android.media.MediaPlayer;
+import android.net.rtp.AudioStream;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -39,13 +45,14 @@ public class MainActivity extends AppCompatActivity {
     public static DatagramPacket udpPacket;
 
     AudioRecord recorder;
+    MediaPlayer player;
+    AudioStream audioStream;
 
-    private int sampleRate = 16000 ;
+    private int sampleRate = 8000;
     private int channelConfig = AudioFormat.CHANNEL_CONFIGURATION_MONO;
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
     int minBufSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
     private boolean status = true;
-
 
 
     @Override
@@ -57,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             udpSocket = new DatagramSocket();
-        }catch (Exception ex){
+        } catch (Exception ex) {
             Log.d("Error", ex.toString());
             ex.printStackTrace();
         }
@@ -65,13 +72,13 @@ public class MainActivity extends AppCompatActivity {
         button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     status = true;
                     //broadcasting();
                     _broadcasting();
                     Log.d("Brodcast", "start");
                 }
-                if(event.getAction() == MotionEvent.ACTION_UP){
+                if (event.getAction() == MotionEvent.ACTION_UP) {
                     status = false;
                     recorder.release();
                     Log.d("Brodcast", "stop");
@@ -83,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
         freq = 10;
         loginIP = "192.168.1.131";
         loginPort = 1235;
+
+        Log.d("stream ", Integer.toString(minBufSize));
 
     }
 
@@ -97,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         registerUdp();
     }
 
-    public void registerUdp(){
+    public void registerUdp() {
 
     }
 
@@ -110,13 +119,20 @@ public class MainActivity extends AppCompatActivity {
 
                     byte[] buffer = new byte[minBufSize];
 
-                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,channelConfig,audioFormat,minBufSize*10);
+                    recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, sampleRate, channelConfig, audioFormat, minBufSize * 10);
                     recorder.startRecording();
                     DataOutputStream output = new DataOutputStream(streamSocket.getOutputStream());
 
-                    while(status == true) {
+                    while (status == true) {
                         minBufSize = recorder.read(buffer, 0, buffer.length);
                         output.write(buffer);
+
+                        /*AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                                sampleRate, AudioFormat.CHANNEL_OUT_MONO,
+                                AudioFormat.ENCODING_PCM_8BIT, buffer.length,
+                                AudioTrack.MODE_STATIC);
+                        audioTrack.write(buffer, 0, buffer.length);
+                        audioTrack.play();*/
                     }
                 } catch (Exception ex) {
                     Log.d("Error", ex.toString());
@@ -139,16 +155,16 @@ public class MainActivity extends AppCompatActivity {
 
                     final InetAddress destination = InetAddress.getByName(streamIP);
 
-                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,channelConfig,audioFormat,minBufSize*10);
+                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, channelConfig, audioFormat, minBufSize * 10);
                     recorder.startRecording();
 
-                    while(status == true) {
+                    while (status == true) {
                         minBufSize = recorder.read(buffer, 0, buffer.length);
 
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                         outputStream.write(freq);
                         outputStream.write(buffer);
-                        udpPacket = new DatagramPacket (outputStream.toByteArray(),buffer.length,destination,streamPort+1);
+                        udpPacket = new DatagramPacket(outputStream.toByteArray(), buffer.length, destination, streamPort + 1);
                         udpSocket.send(udpPacket);
                     }
                 } catch (Exception ex) {
@@ -161,22 +177,24 @@ public class MainActivity extends AppCompatActivity {
         broadcastThread.start();
     }
 
-    public class LoginThread extends Thread{
-        public LoginThread(){}
-        public void run(){
+    public class LoginThread extends Thread {
+        public LoginThread() {
+        }
+
+        public void run() {
             try {
-                Log.d("login ","new socket");
+                Log.d("login ", "new socket");
                 Socket socket = new Socket(loginIP, loginPort);
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 Scanner input = new Scanner(socket.getInputStream());
                 String rcvMsg[];
 
-                if(input.hasNextLine() && !input.nextLine().equals("+OK")){
+                if (input.hasNextLine() && !input.nextLine().equals("+OK")) {
 
                     return;
                 }
                 output.println("signin client key " + Integer.toString(freq));
-                if(input.hasNextLine()){
+                if (input.hasNextLine()) {
                     rcvMsg = input.nextLine().split(":");
                     streamIP = rcvMsg[0];
                     streamPort = Integer.parseInt(rcvMsg[1]);
@@ -189,39 +207,51 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class StreamThread extends Thread{
-        public StreamThread(){}
-        public void run(){
+    public class StreamThread extends Thread {
+        public StreamThread() {
+        }
+
+        public void run() {
             try {
-                Log.d("stream ","new socket");
+                Log.d("stream ", "new socket");
                 streamSocket = new Socket(streamIP, streamPort);
                 PrintWriter output = new PrintWriter(streamSocket.getOutputStream(), true);
                 Scanner input = new Scanner(streamSocket.getInputStream());
                 String rcvMsg[];
 
-                if(input.hasNextLine() && !input.nextLine().equals("+OK")){
+                if (input.hasNextLine() && !input.nextLine().equals("+OK")) {
                     return;
                 }
                 output.println("signin client key " + Integer.toString(freq));
-                if(input.hasNextLine() && !input.nextLine().equals("+OK")) {
+                if (input.hasNextLine() && !input.nextLine().equals("+OK")) {
                     return;
                 }
-                Log.d("stream ","registred");
+                Log.d("stream ", "registred");
 
-                while(true) {
-                    DataInputStream inputData = new DataInputStream(streamSocket.getInputStream());
 
-                    while (true) {
-                        byte[] buf = new byte[640];
-                        inputData.read(buf, 0, 640);
-                        Log.d("stream ", "Data");
-                        AudioData audiodata = new AudioData(byteArray);
+                DataInputStream inputData = new DataInputStream(streamSocket.getInputStream());
+
+                while (true) {
+                    byte[] buf = new byte[640];
+                    inputData.read(buf, 0, 640);
+                    Log.d("stream ", "Data");
+                        /*AudioData audiodata = new AudioData(byteArray);
                         AudioDataStream audioStream = new AudioDataStream(audioData);
-                        AudioPlayer.player.start(audioStream);
-                    }
+                        AudioPlayer.player.start(audioStream);*/
+                    //MediaDataSource mediaDataSource;
+                    //mediaDataSource.readAt(0, buf, 0, 640);
+                    //player = new MediaPlayer();
+                    final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                            sampleRate, AudioFormat.CHANNEL_OUT_MONO,
+                            AudioFormat.ENCODING_PCM_8BIT, buf.length,
+                            AudioTrack.MODE_STATIC);
+                    audioTrack.write(buf, 0, buf.length);
+                    audioTrack.play();
                 }
+
             } catch (Exception ex) {
                 Log.d("Error ", ex.toString());
+                ex.printStackTrace();
             }
         }
     }
