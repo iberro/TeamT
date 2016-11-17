@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         freq = 10;
-        loginIP = "192.168.1.131";
+        loginIP = "192.168.1.100";
         loginPort = 1235;
 
         Log.d("stream ", Integer.toString(minBufSize));
@@ -127,12 +127,12 @@ public class MainActivity extends AppCompatActivity {
                         minBufSize = recorder.read(buffer, 0, buffer.length);
                         output.write(buffer);
 
-                        /*AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                        AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                                 sampleRate, AudioFormat.CHANNEL_OUT_MONO,
                                 AudioFormat.ENCODING_PCM_8BIT, buffer.length,
                                 AudioTrack.MODE_STATIC);
                         audioTrack.write(buffer, 0, buffer.length);
-                        audioTrack.play();*/
+                        audioTrack.play();
                     }
                 } catch (Exception ex) {
                     Log.d("Error", ex.toString());
@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
                     //MediaDataSource mediaDataSource;
                     //mediaDataSource.readAt(0, buf, 0, 640);
                     //player = new MediaPlayer();
-                    final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                    AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                             sampleRate, AudioFormat.CHANNEL_OUT_MONO,
                             AudioFormat.ENCODING_PCM_8BIT, buf.length,
                             AudioTrack.MODE_STATIC);
