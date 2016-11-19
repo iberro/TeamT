@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     String streamIP;
     int streamPort;
     Socket streamSocket;
+    boolean loginReady;
 
 
     StreamThread streamThread;
@@ -74,8 +75,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     status = true;
-                    //broadcasting();
-                    _broadcasting();
+                    broadcasting();
                     Log.d("Brodcast", "start");
                 }
                 if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -87,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        loginReady = false;
+
         freq = 10;
         loginIP = "192.168.1.100";
         loginPort = 1235;
@@ -96,21 +98,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void login(View view) {
+
         LoginThread loginThread = new LoginThread();
         loginThread.start();
     }
 
-    public void streamLogin(View view) {
+    public void streamLogin(View view) throws InterruptedException {
+
+        LoginThread loginThread = new LoginThread();
+        loginThread.start();
+
+        while(loginReady == false){
+
+        }
+
         streamThread = new StreamThread();
         streamThread.start();
-        registerUdp();
     }
 
-    public void registerUdp() {
-
-    }
-
-    public void _broadcasting() {
+    public void broadcasting() {
         Thread broadcastThread = new Thread(new Runnable() {
 
             @Override
@@ -124,15 +130,10 @@ public class MainActivity extends AppCompatActivity {
                     DataOutputStream output = new DataOutputStream(streamSocket.getOutputStream());
 
                     while (status == true) {
-                        minBufSize = recorder.read(buffer, 0, buffer.length);
+                        /*minBufSize  = */
+                        recorder.read(buffer, 0, buffer.length);
                         output.write(buffer);
 
-                        AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                                sampleRate, AudioFormat.CHANNEL_OUT_MONO,
-                                AudioFormat.ENCODING_PCM_8BIT, buffer.length,
-                                AudioTrack.MODE_STATIC);
-                        audioTrack.write(buffer, 0, buffer.length);
-                        audioTrack.play();
                     }
                 } catch (Exception ex) {
                     Log.d("Error", ex.toString());
@@ -144,38 +145,6 @@ public class MainActivity extends AppCompatActivity {
         broadcastThread.start();
     }
 
-    public void broadcasting() {
-        Thread broadcastThread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-
-                    byte[] buffer = new byte[minBufSize];
-
-                    final InetAddress destination = InetAddress.getByName(streamIP);
-
-                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, channelConfig, audioFormat, minBufSize * 10);
-                    recorder.startRecording();
-
-                    while (status == true) {
-                        minBufSize = recorder.read(buffer, 0, buffer.length);
-
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                        outputStream.write(freq);
-                        outputStream.write(buffer);
-                        udpPacket = new DatagramPacket(outputStream.toByteArray(), buffer.length, destination, streamPort + 1);
-                        udpSocket.send(udpPacket);
-                    }
-                } catch (Exception ex) {
-                    Log.d("Error", ex.toString());
-                    ex.printStackTrace();
-                }
-            }
-
-        });
-        broadcastThread.start();
-    }
 
     public class LoginThread extends Thread {
         public LoginThread() {
@@ -199,8 +168,9 @@ public class MainActivity extends AppCompatActivity {
                     streamIP = rcvMsg[0];
                     streamPort = Integer.parseInt(rcvMsg[1]);
                     Log.d("stream ", rcvMsg[0] + ":" + rcvMsg[1]);
-                }
 
+                }
+                loginReady = true;
             } catch (Exception ex) {
                 Log.d("Error ", ex.toString());
             }
@@ -230,23 +200,22 @@ public class MainActivity extends AppCompatActivity {
 
 
                 DataInputStream inputData = new DataInputStream(streamSocket.getInputStream());
+                byte[] buf ;
+                AudioTrack audioTrack = new AudioTrack(
+                        AudioManager.STREAM_MUSIC,
+                        sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                        AudioFormat.ENCODING_PCM_16BIT, 640,
+                        AudioTrack.MODE_STATIC);
 
                 while (true) {
-                    byte[] buf = new byte[640];
+                   buf = new byte[640];
                     inputData.read(buf, 0, 640);
                     Log.d("stream ", "Data");
-                        /*AudioData audiodata = new AudioData(byteArray);
-                        AudioDataStream audioStream = new AudioDataStream(audioData);
-                        AudioPlayer.player.start(audioStream);*/
-                    //MediaDataSource mediaDataSource;
-                    //mediaDataSource.readAt(0, buf, 0, 640);
-                    //player = new MediaPlayer();
-                    AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                            sampleRate, AudioFormat.CHANNEL_OUT_MONO,
-                            AudioFormat.ENCODING_PCM_8BIT, buf.length,
-                            AudioTrack.MODE_STATIC);
-                    audioTrack.write(buf, 0, buf.length);
-                    audioTrack.play();
+
+                    try{ audioTrack.stop();}catch (Exception ex){}
+                        audioTrack.flush();
+                        audioTrack.write(buf, 0, buf.length);
+                        audioTrack.play();
                 }
 
             } catch (Exception ex) {

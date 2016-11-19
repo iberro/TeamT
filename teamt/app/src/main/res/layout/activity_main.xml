@@ -11,26 +11,53 @@
     tools:context="net.iberro.teamt.MainActivity"
     android:weightSum="1">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="get Stream Addr"
-        android:id="@+id/button"
-        android:onClick="login"/>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.52"
+        android:weightSum="1">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Send"
-        android:id="@+id/button3"
-        android:layout_gravity="center_vertical"
-        />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:ems="10"
+            android:id="@+id/editText"
+            android:layout_gravity="center_horizontal"
+            android:text="0"
+            android:gravity="center" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Stream Login"
-        android:id="@+id/button2"
-        android:layout_weight="0.17"
-        android:onClick="streamLogin"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connect"
+            android:id="@+id/button2"
+            android:layout_weight="0.00"
+            android:onClick="streamLogin"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="get Stream Addr"
+            android:id="@+id/button"
+            android:onClick="login"/>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:weightSum="1">
+
+            <Button
+                android:layout_width="133dp"
+                android:layout_height="wrap_content"
+                android:text="Send"
+                android:id="@+id/button3"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="0.09" />
+        </LinearLayout>
+    </LinearLayout>
+
 </LinearLayout>

@@ -45,6 +45,8 @@ public class ClientHandler extends Thread {
                 endConnection();
                 return;
             };
+            sendMessage("+OK");
+            
             inputData = new DataInputStream(socket.getInputStream());
             outputData = new DataOutputStream(socket.getOutputStream());
 
@@ -53,9 +55,9 @@ public class ClientHandler extends Thread {
                 inputData.read(buf, 0, 640);
                 System.out.println("Data");
                 for (ClientHandler client : clientHandlerList.get(Integer.toString(freq))){
-                    //if(client != this){
+                    if(client != this){
                         client.sendData(buf);
-                    //}
+                    }
                 }
             }
         } catch (Exception ex) {

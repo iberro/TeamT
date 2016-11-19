@@ -1,0 +1,31 @@
+    public void broadcasting() {
+        Thread broadcastThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+
+                    byte[] buffer = new byte[minBufSize];
+
+                    final InetAddress destination = InetAddress.getByName(streamIP);
+
+                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, channelConfig, audioFormat, minBufSize * 10);
+                    recorder.startRecording();
+
+                    while (status == true) {
+                        minBufSize = recorder.read(buffer, 0, buffer.length);
+
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        outputStream.write(freq);
+                        outputStream.write(buffer);
+                        udpPacket = new DatagramPacket(outputStream.toByteArray(), buffer.length, destination, streamPort + 1);
+                        udpSocket.send(udpPacket);
+                    }
+                } catch (Exception ex) {
+                    Log.d("Error", ex.toString());
+                    ex.printStackTrace();
+                }
+            }
+        });
+        broadcastThread.start();
+    }
