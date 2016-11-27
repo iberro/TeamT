@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -36,8 +37,9 @@ public class MainActivity extends AppCompatActivity {
     int streamPort;
     Socket streamSocket;
     boolean loginReady;
+    boolean connected;
 
-
+    LoginThread loginThread;
     StreamThread streamThread;
 
     //Audio data
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button button = (Button) findViewById(R.id.button3);
+        final Button button = (Button) findViewById(R.id.send);
 
         try {
             udpSocket = new DatagramSocket();
@@ -88,32 +90,77 @@ public class MainActivity extends AppCompatActivity {
         });
 
         loginReady = false;
+        connected = false;
 
-        freq = 10;
-        loginIP = "192.168.1.100";
+        loginThread = new LoginThread();
+
+        loginIP = "192.168.1.105";
         loginPort = 1235;
 
         Log.d("stream ", Integer.toString(minBufSize));
 
     }
 
-    public void login(View view) {
+    public void connect(View view) throws InterruptedException {
+        if(!connected) {
+            EditText editText = (EditText)findViewById(R.id.freq);
+            freq = Integer.parseInt(editText.getText().toString());
+            Log.d("freq", Integer.toString(freq));
+            login();
+            return;
+        }
 
-        LoginThread loginThread = new LoginThread();
+        makeConnect(false);
+    }
+
+    public void makeConnect(boolean status){
+
+        Button buttonConnect = (Button)findViewById(R.id.connect);
+        Button buttonTalk = (Button)findViewById(R.id.send);
+        Button buttonInc = (Button)findViewById(R.id.inc);
+        Button buttonDec = (Button)findViewById(R.id.dec);
+
+        if (status) {
+            connected = true;
+
+            buttonConnect.setText("Disconnect");
+            buttonTalk.setEnabled(true);
+            buttonInc.setEnabled(false);
+            buttonDec.setEnabled(false);
+        }else {
+            connected = false;
+
+            //streamThread.stop();
+
+            buttonConnect.setText("Connect");
+            buttonTalk.setEnabled(false);
+            buttonInc.setEnabled(true);
+            buttonDec.setEnabled(true);
+        }
+    }
+
+    public void login() {
         loginThread.start();
     }
 
-    public void streamLogin(View view) throws InterruptedException {
-
-        LoginThread loginThread = new LoginThread();
-        loginThread.start();
-
-        while(loginReady == false){
-
-        }
-
+    public void streamLogin() throws InterruptedException {
         streamThread = new StreamThread();
         streamThread.start();
+    }
+
+    public void dec(View view){
+        EditText editText = (EditText)findViewById(R.id.freq);
+        int temp = Integer.parseInt(editText.getText().toString());
+        if(temp <= 0 ) return;
+        temp--;
+        editText.setText( Integer.toString(temp));
+    }
+
+    public void inc(View view){
+        EditText editText = (EditText)findViewById(R.id.freq);
+        int temp = Integer.parseInt(editText.getText().toString());
+        temp++;
+        editText.setText(Integer.toString(temp));
     }
 
     public void broadcasting() {
@@ -133,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
                         /*minBufSize  = */
                         recorder.read(buffer, 0, buffer.length);
                         output.write(buffer);
-
                     }
                 } catch (Exception ex) {
                     Log.d("Error", ex.toString());
@@ -159,7 +205,6 @@ public class MainActivity extends AppCompatActivity {
                 String rcvMsg[];
 
                 if (input.hasNextLine() && !input.nextLine().equals("+OK")) {
-
                     return;
                 }
                 output.println("signin client key " + Integer.toString(freq));
@@ -170,7 +215,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("stream ", rcvMsg[0] + ":" + rcvMsg[1]);
 
                 }
+
                 loginReady = true;
+                streamLogin();
             } catch (Exception ex) {
                 Log.d("Error ", ex.toString());
             }
@@ -197,7 +244,12 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 Log.d("stream ", "registred");
-
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        makeConnect(true);
+                    }
+                });
 
                 DataInputStream inputData = new DataInputStream(streamSocket.getInputStream());
                 byte[] buf ;

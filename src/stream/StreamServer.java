@@ -71,7 +71,7 @@ public class StreamServer extends Server {
         //get local host ip
         //
         //
-        this.ip = "192.168.1.100";
+        this.ip = "192.168.1.105";
         this.port = port;
         this.min = 0;
         this.max = 0;
