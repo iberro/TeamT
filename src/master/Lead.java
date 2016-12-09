@@ -18,5 +18,4 @@ public class Lead {
         Master master = new Master();
         master.start();
     }
-
 }

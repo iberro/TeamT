@@ -8,6 +8,7 @@ package stream;
 import common.Server;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -68,13 +69,13 @@ public class StreamServer extends Server {
         masterCommunicator = new StreamMasterCommunicator(masterIP, this);
         clientHandlerList = new ConcurrentHashMap<>();
 
-        //get local host ip
-        //
-        //
         this.ip = "192.168.1.105";
+        //this.ip = InetAddress.getLocalHost().toString();
         this.port = port;
         this.min = 0;
         this.max = 0;
+        
+        System.out.println("ip: " + this.ip);
     }
 
     @Override
